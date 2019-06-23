@@ -62,5 +62,7 @@ python bio2ere.py --bio [bio_path] --ann [ann_path] --ere [ace_path]
 
 ## Citation
 [1] Lifu Huang, Taylor Cassidy, Xiaocheng Feng, Heng Ji, Clare R Voss, Jiawei Han, Avirup Sil. Liberal Event Extraction and Event Schema Induction. Proc. ACL'2016
+
 [2] Lifu Huang, Avirup Sil, Heng Ji, Radu Florian. Improving slot filling performance with attentive neural networks on dependency structures. Proc. EMNLP'2017
+
 [3] Lifu Huang, Heng Ji, Kyunghyun Cho, Clare R Voss. Zero-shot transfer learning for event extraction, Proc. ACL, 2018
