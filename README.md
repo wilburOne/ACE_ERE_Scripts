@@ -1,4 +1,4 @@
-# ACE and ERE Preprocessing Scripts
+# ACE and ERE Preprocessing
 
 This repository includes the preprocessing scripts for ACE and ERE datasets, including name tagging, entity coreference, relation extraction, event extraction and event coreference tasks. (verified on ACE_2005 and Rich_ERE corpus)
 
