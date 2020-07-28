@@ -12,6 +12,7 @@ def write_ann(bio_file, ann_file, ace_file):
               'relations_belong_to',
               'trigger_offset', 'trigger_type', 'trigger_cluster', 'trigger_arguments']
     writer = csv.DictWriter(csv_file, fieldnames=fields)
+    writer.writeheader()
 
     entity_mentions_mentionid2dict, filler_mentions_mentionid2dict, relation_mentions_id2dict, \
     event_mentions_id2dict = parse_ann(ann_file)

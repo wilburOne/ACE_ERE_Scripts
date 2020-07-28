@@ -7,12 +7,13 @@ import xml.etree.ElementTree as ET
 # word, offset, nertag, relation, trigger, argument
 def write_ann(bio_file, ann_file, ace_file):
     csv_file = open(ace_file, 'w')
-    fields = ['token', 'offset', 'ner_offset', 'ner_type', 'ner_nam_nom', 'ner_cluster',
+    fields = ['token', 'offset', 'ner_offset', 'ner_type', 'ner_nam_nom', 'ner_mention', 'ner_cluster',
               'timex2_offset', 'timex2_cluster',
               'value_offset', 'value_type', 'value_cluster',
               'relations_belong_to',
               'trigger_offset', 'trigger_type', 'trigger_cluster', 'trigger_arguments']
     writer = csv.DictWriter(csv_file, fieldnames=fields)
+    writer.writeheader()
 
     entity_mentions_mentionid2dict, timex2_mentions_mentionid2dict, value_mentions_mentionid2dict, \
     relation_mentions_id2dict, event_mentions_id2dict = parse_ann(ann_file)
@@ -42,11 +43,13 @@ def write_ann(bio_file, ann_file, ace_file):
                     token_dict['ner_offset'] = 'O'
                     token_dict['ner_type'] = 'O'
                     token_dict['ner_nam_nom'] = 'O'
+                    token_dict['ner_mention'] = 'O'
                     token_dict['ner_cluster'] = 'O'
                 else:
                     ner_offsets = []
                     ner_types = []
                     ner_nam_noms = []
+                    ner_mentions = []
                     ner_clusters = []
 
                     for id in entity_mention_ids:
@@ -54,10 +57,12 @@ def write_ann(bio_file, ann_file, ace_file):
                         ner_types.append(entity_mentions_mentionid2dict[id]['type'] + ':' + \
                                              entity_mentions_mentionid2dict[id]['subtype'])
                         ner_nam_noms.append(entity_mentions_mentionid2dict[id]['mention_type'])
+                        ner_mentions.append(entity_mentions_mentionid2dict[id]['text'])
                         ner_clusters.append(entity_mentions_mentionid2dict[id]['entity_id'])
                     token_dict['ner_offset'] = '#@#'.join(ner_offsets)
                     token_dict['ner_type'] = '#@#'.join(ner_types)
                     token_dict['ner_nam_nom'] = '#@#'.join(ner_nam_noms)
+                    token_dict['ner_mention'] = '#@#'.join(ner_mentions)
                     token_dict['ner_cluster'] = '#@#'.join(ner_clusters)
 
                 if len(timex2_mention_ids) == 0:
@@ -128,13 +133,17 @@ def write_ann(bio_file, ann_file, ace_file):
                             arg_str = arg['mention_argument_refid'] + ':' + arg['mention_argument_role'] + ':' + \
                                       arg['mention_argument_offset']
                             arguments.append(arg_str)
-                        arguments_str = ' '.join(arguments)
-                        trigger_arguments_set.append(arguments_str)
+                        if len(arguments) > 0:
+                            arguments_str = ' '.join(arguments)
+                            trigger_arguments_set.append(arguments_str)
 
                     token_dict['trigger_offset'] = '#@#'.join(trigger_offsets)
                     token_dict['trigger_type'] = '#@#'.join(trigger_types)
                     token_dict['trigger_cluster'] = '#@#'.join(trigger_clusters)
-                    token_dict['trigger_arguments'] = '#@#'.join(trigger_arguments_set)
+                    if len(trigger_arguments_set) > 0:
+                        token_dict['trigger_arguments'] = '#@#'.join(trigger_arguments_set)
+                    else:
+                        token_dict['trigger_arguments'] = 'O'
 
                 writer.writerow(token_dict)
             else:
@@ -464,7 +473,7 @@ if __name__ == "__main__":
         file_names = [bio_path]
 
     for f in file_names:
-        print(f)
+        # print(f)
         bio_file= os.path.join(bio_path, f+".bio")
         ann_file = os.path.join(ann_path, f+".apf.xml")
         ace_file = os.path.join(ace_path, f+".csv")

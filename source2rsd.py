@@ -12,17 +12,29 @@ with open(os.path.join(python_path, "html_entities"), 'r') as f:
 
 def remove_xml_tag(source_file, rsd_file, data):
     out = open(rsd_file, 'w')
+    signal = 0 # 0 before read <TEXT>, 1 after
+    lines = []
     with open(source_file, 'r') as f:
         for line in f:
-            line = line.strip()
-            new_line = remove_tag(line, data)
-            out.write(new_line + " ")
+            line = line.strip('\n')
+            if line == "<TEXT>":
+                signal = 1
+            if signal == 0:
+                new_line = remove_tag(line, data, signal)
+                out.write(new_line + " ")
+            elif signal == 1:
+                lines.append(line)
+    con_line = ' '.join(lines)
+    new_line = remove_tag(con_line, data, signal)
+    out.write(new_line + " ")
     out.close()
 
 
-def remove_tag(sent, data):
+def remove_tag(sent, data, signal):
     newsent = sent
     if data == 'ace' or data.lower() == 'ace':
+        # keep text only after <TEXT>
+
         if (newsent.startswith("<DOCID>") or newsent.startswith("<DOCTYPE") or newsent.startswith("<DATETIME>")
                 or newsent.startswith("<POSTER>") or newsent.startswith("<POSTDATE>")):
             while "<" in newsent and ">" in newsent and newsent.index("<") < newsent.index(">"):
@@ -31,7 +43,6 @@ def remove_tag(sent, data):
                 str1 = newsent[0:index1]
                 str2 = newsent[index2+1:]
                 newsent = str1+str2
-            # newsent = ''.join(len(newsent)*[' '])
         else:
             while "<" in newsent and ">" in newsent and newsent.index("<") < newsent.index(">"):
                 index1 = newsent.index("<")
@@ -39,6 +50,10 @@ def remove_tag(sent, data):
                 str1 = newsent[0:index1]
                 str2 = newsent[index2+1:]
                 newsent = str1+str2
+
+        if signal == 0:
+            newsent = ''.join(len(newsent) * [' '])
+
     elif data == 'ere' or data.lower() == 'ere':
         # replace html entities
         for ent in html_entities:
@@ -93,7 +108,6 @@ if __name__ == "__main__":
         file_names = [source_path]
 
     for f in file_names:
-        print(f)
         source_file= os.path.join(source_path, f)
         rsd_file = os.path.join(rsd_path, f)
 
